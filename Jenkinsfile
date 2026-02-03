@@ -2,33 +2,27 @@ node {
     def app
 
     stage('Clone repository') {
-      
-
         checkout scm
     }
 
     stage('Build image') {
-  
-       app = docker.build("rakhi12345/test")
+        app = docker.build("viveksharmaacn/testgitopsapp:${env.BUILD_NUMBER}")
     }
 
     stage('Test image') {
-  
-
         app.inside {
             sh 'echo "Tests passed"'
         }
     }
 
     stage('Push image') {
-        
         docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
             app.push("${env.BUILD_NUMBER}")
         }
     }
     
     stage('Trigger ManifestUpdate') {
-                echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
-        }
+        echo "triggering updatemanifestjob"
+        build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+    }
 }
